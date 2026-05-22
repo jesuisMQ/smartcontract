@@ -15,6 +15,11 @@ contract MockV3Aggregator {
         return (0, price, 0, 0, 0);
     }
 }
+contract RevertReceiver {
+    receive() external payable {
+        revert();
+    }
+}
 
 contract MissCosmoVotingTest is Test {
     MissCosmoVoting voting;
@@ -291,4 +296,22 @@ contract MissCosmoVotingTest is Test {
 
         assertGt(ethRequired, 0);
     }
+
+    function testRevertInvalidOracle() public {
+    MockV3Aggregator bad = new MockV3Aggregator(0);
+
+    MissCosmoVoting v = new MissCosmoVoting(address(bad));
+
+    vm.expectRevert("Invalid oracle");
+    v.getEthPrice();
+}
+
+
+function testInvalidPackageStruct() public {
+    vm.prank(user);
+
+    vm.expectRevert(MissCosmoVoting.InvalidPackage.selector);
+    voting.vote(0, 255);
+}
+
 }

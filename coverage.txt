@@ -1,0 +1,48 @@
+Compiling 25 files with Solc 0.8.26
+Solc 0.8.26 finished in 1.31s
+Compiler run successful!
+Analysing contracts...
+Running tests...
+
+Ran 3 tests for test/DeployMissCosmoVoting.t.sol:DeployMissCosmoVotingTest
+[PASS] testDeployScriptWorks() (gas: 1799726)
+[PASS] testPackagesInitialized() (gas: 1799376)
+[PASS] testPriceFeedWorks() (gas: 1818139)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 1.12s (552.70ms CPU time)
+
+Ran 20 tests for test/MissCosmoVoting.t.sol:MissCosmoVotingTest
+[PASS] testCandidateCount() (gas: 8014)
+[PASS] testEmitCandidateCreated() (gas: 73066)
+[PASS] testEmitVotePurchased() (gas: 88360)
+[PASS] testEmitWithdraw() (gas: 102169)
+[PASS] testForkSepoliaPriceFeed() (gas: 28672)
+[PASS] testForkSepoliaRealPriceCalc() (gas: 1791268)
+[PASS] testGetCandidate() (gas: 22136)
+[PASS] testGetEthPrice() (gas: 12661)
+[PASS] testGetRequiredEth() (gas: 16868)
+[PASS] testOwnerSetCorrectly() (gas: 8148)
+[PASS] testPriceFeedSet() (gas: 8340)
+[PASS] testRevertInsufficientETH() (gas: 33357)
+[PASS] testRevertInvalidCandidate() (gas: 19658)
+[PASS] testRevertInvalidPackage() (gas: 25450)
+[PASS] testRevertUpdateInvalidCandidate() (gas: 14942)
+[PASS] testRevertUpdateMetadataNotOwner() (gas: 12585)
+[PASS] testRevertWithdrawNotOwner() (gas: 11148)
+[PASS] testUpdateCandidateMetadata() (gas: 28692)
+[PASS] testVote() (gas: 93928)
+[PASS] testWithdraw() (gas: 100291)
+Suite result: ok. 20 passed; 0 failed; 0 skipped; finished in 1.23s (2.50s CPU time)
+
+Ran 2 test suites in 1.23s (2.35s CPU time): 23 tests passed, 0 failed, 0 skipped (23 total tests)
+
+╭------------------------------------+-----------------+----------------+---------------+-----------------╮
+| File                               | % Lines         | % Statements   | % Branches    | % Funcs         |
++=========================================================================================================+
+| script/DeployMissCosmoVoting.s.sol | 100.00% (5/5)   | 100.00% (4/4)  | 100.00% (0/0) | 100.00% (1/1)   |
+|------------------------------------+-----------------+----------------+---------------+-----------------|
+| src/MissCosmoVoting.sol            | 100.00% (48/48) | 96.36% (53/55) | 63.64% (7/11) | 100.00% (9/9)   |
+|------------------------------------+-----------------+----------------+---------------+-----------------|
+| test/MissCosmoVoting.t.sol         | 100.00% (4/4)   | 100.00% (2/2)  | 100.00% (0/0) | 100.00% (2/2)   |
+|------------------------------------+-----------------+----------------+---------------+-----------------|
+| Total                              | 100.00% (57/57) | 96.72% (59/61) | 63.64% (7/11) | 100.00% (12/12) |
+╰------------------------------------+-----------------+----------------+---------------+-----------------╯

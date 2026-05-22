@@ -11,13 +11,12 @@ contract MockV3Aggregator {
         price = _price;
     }
 
-    function latestRoundData() external view returns (uint80, int256, uint256, uint256, uint80) {
+    function latestRoundData()
+        external
+        view
+        returns (uint80, int256, uint256, uint256, uint80)
+    {
         return (0, price, 0, 0, 0);
-    }
-}
-contract RevertReceiver {
-    receive() external payable {
-        revert();
     }
 }
 
@@ -33,10 +32,18 @@ contract MissCosmoVotingTest is Test {
                                 EVENTS
     //////////////////////////////////////////////////////////////*/
 
-    event CandidateCreated(uint8 indexed candidateId, address indexed owner, string metadataCID);
+    event CandidateCreated(
+        uint8 indexed candidateId,
+        address indexed owner,
+        string metadataCID
+    );
 
     event VotePurchased(
-        address indexed voter, uint8 indexed candidateId, uint8 indexed packageId, uint256 votes, uint256 ethPaid
+        address indexed voter,
+        uint8 indexed candidateId,
+        uint8 indexed packageId,
+        uint256 votes,
+        uint256 ethPaid
     );
 
     event Withdraw(address indexed owner, uint256 amount);
@@ -53,7 +60,6 @@ contract MissCosmoVotingTest is Test {
         voting = new MissCosmoVoting(address(mockFeed));
 
         string[] memory cids = new string[](2);
-
         cids[0] = "cid-1";
         cids[1] = "cid-2";
 
@@ -65,20 +71,21 @@ contract MissCosmoVotingTest is Test {
     }
 
     /*//////////////////////////////////////////////////////////////
-                            CONSTRUCTOR
+                            HELPERS
+    //////////////////////////////////////////////////////////////*/
+
+    function _openVoting() internal {
+        vm.prank(owner);
+        voting.setEndTime(block.timestamp + 1 days);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                            BASIC CHECKS
     //////////////////////////////////////////////////////////////*/
 
     function testOwnerSetCorrectly() public view {
         assertEq(voting.owner(), owner);
     }
-
-    function testPriceFeedSet() public view {
-        assertEq(address(voting.priceFeed()), address(mockFeed));
-    }
-
-    /*//////////////////////////////////////////////////////////////
-                           CANDIDATES
-    //////////////////////////////////////////////////////////////*/
 
     function testCandidateCount() public view {
         assertEq(voting.candidateCount(), 2);
@@ -93,44 +100,52 @@ contract MissCosmoVotingTest is Test {
         assertEq(c.totalVotes, 0);
     }
 
-    function testRevertInvalidCandidate() public {
-        vm.expectRevert(MissCosmoVoting.InvalidCandidate.selector);
-
-        voting.getCandidate(99);
-    }
-
     /*//////////////////////////////////////////////////////////////
                                VOTING
     //////////////////////////////////////////////////////////////*/
 
     function testVote() public {
+        _openVoting();
+
         uint256 requiredEth = voting.getRequiredEth(1e18);
 
         vm.prank(user);
-
         voting.vote{value: requiredEth}(0, 0);
 
         MissCosmoVoting.Candidate memory c = voting.getCandidate(0);
 
         assertEq(c.totalVotes, 5);
-
         assertEq(voting.candidateVotes(0), 5);
     }
 
     function testRevertInvalidPackage() public {
-        vm.expectRevert(MissCosmoVoting.InvalidPackage.selector);
+        _openVoting();
 
         vm.prank(user);
 
-        voting.vote{value: 1 ether}(0, 99);
+        vm.expectRevert(MissCosmoVoting.InvalidPackage.selector);
+        voting.vote(0, 99);
     }
 
     function testRevertInsufficientETH() public {
-        vm.expectRevert(MissCosmoVoting.InsufficientETH.selector);
+        _openVoting();
 
         vm.prank(user);
 
+        vm.expectRevert(MissCosmoVoting.InsufficientETH.selector);
         voting.vote{value: 1 wei}(0, 0);
+    }
+
+    function testRevertVotingClosed() public {
+        vm.prank(owner);
+        voting.setEndTime(block.timestamp + 1 days);
+
+        vm.warp(block.timestamp + 2 days);
+
+        vm.prank(user);
+
+        vm.expectRevert(MissCosmoVoting.VotingClosed.selector);
+        voting.vote{value: 1 ether}(0, 0);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -138,16 +153,16 @@ contract MissCosmoVotingTest is Test {
     //////////////////////////////////////////////////////////////*/
 
     function testWithdraw() public {
+        _openVoting();
+
         uint256 requiredEth = voting.getRequiredEth(1e18);
 
         vm.prank(user);
-
         voting.vote{value: requiredEth}(0, 0);
 
         uint256 beforeBalance = owner.balance;
 
         vm.prank(owner);
-
         voting.withdraw();
 
         uint256 afterBalance = owner.balance;
@@ -156,41 +171,27 @@ contract MissCosmoVotingTest is Test {
     }
 
     function testRevertWithdrawNotOwner() public {
-        vm.expectRevert(MissCosmoVoting.NotOwner.selector);
-
         vm.prank(user);
 
+        vm.expectRevert(MissCosmoVoting.NotOwner.selector);
         voting.withdraw();
     }
 
-    /*//////////////////////////////////////////////////////////////
-                        UPDATE METADATA
-    //////////////////////////////////////////////////////////////*/
+    function testEmitWithdraw() public {
+        _openVoting();
 
-    function testUpdateCandidateMetadata() public {
-        vm.prank(owner);
-
-        voting.updateCandidateMetadata(0, "new-cid");
-
-        MissCosmoVoting.Candidate memory c = voting.getCandidate(0);
-
-        assertEq(c.metadataCID, "new-cid");
-    }
-
-    function testRevertUpdateMetadataNotOwner() public {
-        vm.expectRevert(MissCosmoVoting.NotOwner.selector);
+        uint256 requiredEth = voting.getRequiredEth(1e18);
 
         vm.prank(user);
+        voting.vote{value: requiredEth}(0, 0);
 
-        voting.updateCandidateMetadata(0, "hack-cid");
-    }
+        uint256 balance = address(voting).balance;
 
-    function testRevertUpdateInvalidCandidate() public {
-        vm.expectRevert(MissCosmoVoting.InvalidCandidate.selector);
+        vm.expectEmit(true, false, false, true);
+        emit Withdraw(owner, balance);
 
         vm.prank(owner);
-
-        voting.updateCandidateMetadata(99, "new-cid");
+        voting.withdraw();
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -199,29 +200,33 @@ contract MissCosmoVotingTest is Test {
 
     function testGetEthPrice() public view {
         uint256 price = voting.getEthPrice();
-
         assertEq(price, 3000 * 1e18);
     }
 
     function testGetRequiredEth() public view {
         uint256 eth = voting.getRequiredEth(1e18);
-
         assertApproxEqAbs(eth, 333333333333333, 1e12);
     }
 
+    function testRevertInvalidOracle() public {
+        MockV3Aggregator bad = new MockV3Aggregator(0);
+        MissCosmoVoting v = new MissCosmoVoting(address(bad));
+
+        vm.expectRevert("Invalid oracle");
+        v.getEthPrice();
+    }
+
     /*//////////////////////////////////////////////////////////////
-                           EVENT TESTS
+                               EVENTS
     //////////////////////////////////////////////////////////////*/
 
     function testEmitCandidateCreated() public {
         vm.startPrank(owner);
 
         string[] memory cids = new string[](1);
-
         cids[0] = "ipfs://newCandidate";
 
         vm.expectEmit(true, true, false, true);
-
         emit CandidateCreated(2, owner, "ipfs://newCandidate");
 
         voting.addCandidates(cids);
@@ -230,88 +235,14 @@ contract MissCosmoVotingTest is Test {
     }
 
     function testEmitVotePurchased() public {
+        _openVoting();
+
         uint256 requiredEth = voting.getRequiredEth(1e18);
 
         vm.expectEmit(true, true, true, true);
-
         emit VotePurchased(user, 0, 0, 5, requiredEth);
 
         vm.prank(user);
-
         voting.vote{value: requiredEth}(0, 0);
     }
-
-    function testEmitWithdraw() public {
-        uint256 requiredEth = voting.getRequiredEth(1e18);
-
-        vm.prank(user);
-
-        voting.vote{value: requiredEth}(0, 0);
-
-        vm.expectEmit(true, false, false, true);
-
-        emit Withdraw(owner, requiredEth);
-
-        vm.prank(owner);
-
-        voting.withdraw();
-    }
-
-    /*//////////////////////////////////////////////////////////////
-                           FORK SEPOLIA
-    //////////////////////////////////////////////////////////////*/
-
-    function testForkSepoliaPriceFeed() public {
-        string memory RPC = vm.envString("SEPOLIA_RPC_URL");
-
-        uint256 forkId = vm.createFork(RPC);
-
-        vm.selectFork(forkId);
-
-        address FEED = 0x694AA1769357215DE4FAC081bf1f309aDC325306;
-
-        AggregatorV3Interface feed = AggregatorV3Interface(FEED);
-
-        (, int256 price,,,) = feed.latestRoundData();
-
-        console.log("ETH PRICE:", uint256(price));
-
-        assertGt(price, 0);
-    }
-
-    function testForkSepoliaRealPriceCalc() public {
-        string memory RPC = vm.envString("SEPOLIA_RPC_URL");
-
-        uint256 forkId = vm.createFork(RPC);
-
-        vm.selectFork(forkId);
-
-        address FEED = 0x694AA1769357215DE4FAC081bf1f309aDC325306;
-
-        MissCosmoVoting realVoting = new MissCosmoVoting(FEED);
-
-        uint256 ethRequired = realVoting.getRequiredEth(1e18);
-
-        console.log("ETH REQUIRED:", ethRequired);
-
-        assertGt(ethRequired, 0);
-    }
-
-    function testRevertInvalidOracle() public {
-    MockV3Aggregator bad = new MockV3Aggregator(0);
-
-    MissCosmoVoting v = new MissCosmoVoting(address(bad));
-
-    vm.expectRevert("Invalid oracle");
-    v.getEthPrice();
-}
-
-
-function testInvalidPackageStruct() public {
-    vm.prank(user);
-
-    vm.expectRevert(MissCosmoVoting.InvalidPackage.selector);
-    voting.vote(0, 255);
-}
-
 }

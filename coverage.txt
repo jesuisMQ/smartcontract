@@ -1,48 +1,43 @@
 Compiling 25 files with Solc 0.8.26
-Solc 0.8.26 finished in 1.31s
+Solc 0.8.26 finished in 1.09s
 Compiler run successful!
 Analysing contracts...
 Running tests...
 
+Ran 15 tests for test/MissCosmoVoting.t.sol:MissCosmoVotingTest
+[PASS] testCandidateCount() (gas: 7992)
+[PASS] testEmitCandidateCreated() (gas: 73044)
+[PASS] testEmitVotePurchased() (gas: 114814)
+[PASS] testEmitWithdraw() (gas: 126994)
+[PASS] testGetCandidate() (gas: 22181)
+[PASS] testGetEthPrice() (gas: 12707)
+[PASS] testGetRequiredEth() (gas: 16891)
+[PASS] testOwnerSetCorrectly() (gas: 8104)
+[PASS] testRevertInsufficientETH() (gas: 59722)
+[PASS] testRevertInvalidOracle() (gas: 1875198)
+[PASS] testRevertInvalidPackage() (gas: 45175)
+[PASS] testRevertVotingClosed() (gas: 45861)
+[PASS] testRevertWithdrawNotOwner() (gas: 11127)
+[PASS] testVote() (gas: 120425)
+[PASS] testWithdraw() (gas: 124724)
+Suite result: ok. 15 passed; 0 failed; 0 skipped; finished in 5.35ms (10.12ms CPU time)
+
 Ran 3 tests for test/DeployMissCosmoVoting.t.sol:DeployMissCosmoVotingTest
-[PASS] testDeployScriptWorks() (gas: 1799726)
-[PASS] testPackagesInitialized() (gas: 1799376)
-[PASS] testPriceFeedWorks() (gas: 1818139)
-Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 1.12s (552.70ms CPU time)
+[PASS] testDeployScriptWorks() (gas: 1807654)
+[PASS] testPackagesInitialized() (gas: 1807392)
+[PASS] testPriceFeedWorks() (gas: 1826178)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 1.50s (1.14s CPU time)
 
-Ran 20 tests for test/MissCosmoVoting.t.sol:MissCosmoVotingTest
-[PASS] testCandidateCount() (gas: 8014)
-[PASS] testEmitCandidateCreated() (gas: 73066)
-[PASS] testEmitVotePurchased() (gas: 88360)
-[PASS] testEmitWithdraw() (gas: 102169)
-[PASS] testForkSepoliaPriceFeed() (gas: 28672)
-[PASS] testForkSepoliaRealPriceCalc() (gas: 1791268)
-[PASS] testGetCandidate() (gas: 22136)
-[PASS] testGetEthPrice() (gas: 12661)
-[PASS] testGetRequiredEth() (gas: 16868)
-[PASS] testOwnerSetCorrectly() (gas: 8148)
-[PASS] testPriceFeedSet() (gas: 8340)
-[PASS] testRevertInsufficientETH() (gas: 33357)
-[PASS] testRevertInvalidCandidate() (gas: 19658)
-[PASS] testRevertInvalidPackage() (gas: 25450)
-[PASS] testRevertUpdateInvalidCandidate() (gas: 14942)
-[PASS] testRevertUpdateMetadataNotOwner() (gas: 12585)
-[PASS] testRevertWithdrawNotOwner() (gas: 11148)
-[PASS] testUpdateCandidateMetadata() (gas: 28692)
-[PASS] testVote() (gas: 93928)
-[PASS] testWithdraw() (gas: 100291)
-Suite result: ok. 20 passed; 0 failed; 0 skipped; finished in 1.23s (2.50s CPU time)
-
-Ran 2 test suites in 1.23s (2.35s CPU time): 23 tests passed, 0 failed, 0 skipped (23 total tests)
+Ran 2 test suites in 1.50s (1.50s CPU time): 18 tests passed, 0 failed, 0 skipped (18 total tests)
 
 ╭------------------------------------+-----------------+----------------+---------------+-----------------╮
 | File                               | % Lines         | % Statements   | % Branches    | % Funcs         |
 +=========================================================================================================+
 | script/DeployMissCosmoVoting.s.sol | 100.00% (5/5)   | 100.00% (4/4)  | 100.00% (0/0) | 100.00% (1/1)   |
 |------------------------------------+-----------------+----------------+---------------+-----------------|
-| src/MissCosmoVoting.sol            | 100.00% (48/48) | 96.36% (53/55) | 63.64% (7/11) | 100.00% (9/9)   |
+| src/MissCosmoVoting.sol            | 100.00% (50/50) | 94.83% (55/58) | 61.54% (8/13) | 100.00% (10/10) |
 |------------------------------------+-----------------+----------------+---------------+-----------------|
 | test/MissCosmoVoting.t.sol         | 100.00% (4/4)   | 100.00% (2/2)  | 100.00% (0/0) | 100.00% (2/2)   |
 |------------------------------------+-----------------+----------------+---------------+-----------------|
-| Total                              | 100.00% (57/57) | 96.72% (59/61) | 63.64% (7/11) | 100.00% (12/12) |
+| Total                              | 100.00% (59/59) | 95.31% (61/64) | 61.54% (8/13) | 100.00% (13/13) |
 ╰------------------------------------+-----------------+----------------+---------------+-----------------╯

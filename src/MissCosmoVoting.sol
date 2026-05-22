@@ -1,12 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
-import {
-    AggregatorV3Interface
-} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
+import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
 contract MissCosmoVoting {
-
     /*//////////////////////////////////////////////////////////////
                                STRUCTS
     //////////////////////////////////////////////////////////////*/
@@ -40,24 +37,13 @@ contract MissCosmoVoting {
                                 EVENTS
     //////////////////////////////////////////////////////////////*/
 
-    event CandidateCreated(
-        uint8 indexed candidateId,
-        address indexed owner,
-        string metadataCID
-    );
+    event CandidateCreated(uint8 indexed candidateId, address indexed owner, string metadataCID);
 
     event VotePurchased(
-        address indexed voter,
-        uint8 indexed candidateId,
-        uint8 indexed packageId,
-        uint256 votes,
-        uint256 ethPaid
+        address indexed voter, uint8 indexed candidateId, uint8 indexed packageId, uint256 votes, uint256 ethPaid
     );
 
-    event Withdraw(
-        address indexed owner,
-        uint256 amount
-    );
+    event Withdraw(address indexed owner, uint256 amount);
 
     /*//////////////////////////////////////////////////////////////
                                 ERRORS
@@ -102,41 +88,25 @@ contract MissCosmoVoting {
     //////////////////////////////////////////////////////////////*/
 
     // 🔥 CHỈ OWNER DEPLOY CONTRACT MỚI ĐƯỢC ADD CANDIDATE
-    function addCandidates(string[] memory metadataCIDs)
-    external
-    onlyOwner
-    {
-    for (uint i = 0; i < metadataCIDs.length; i++) {
-        uint8 id = candidateCount++;
+    function addCandidates(string[] memory metadataCIDs) external onlyOwner {
+        for (uint256 i = 0; i < metadataCIDs.length; i++) {
+            uint8 id = candidateCount++;
 
-        candidates[id] = Candidate({
-            id: id,
-            owner: owner,
-            metadataCID: metadataCIDs[i],
-            totalVotes: 0
-        });
+            candidates[id] = Candidate({id: id, owner: owner, metadataCID: metadataCIDs[i], totalVotes: 0});
 
-        emit CandidateCreated(id, owner, metadataCIDs[i]);
+            emit CandidateCreated(id, owner, metadataCIDs[i]);
+        }
     }
+
+    function updateCandidateMetadata(uint8 id, string memory newCID) external onlyOwner {
+        if (candidates[id].owner == address(0)) {
+            revert InvalidCandidate();
+        }
+
+        candidates[id].metadataCID = newCID;
     }
-    function updateCandidateMetadata(
-    uint8 id,
-    string memory newCID
-)
-    external
-    onlyOwner
-{
-    if (candidates[id].owner == address(0))
-        revert InvalidCandidate();
 
-    candidates[id].metadataCID = newCID;
-}
-
-    function getCandidate(uint8 id)
-        external
-        view
-        returns (Candidate memory)
-    {
+    function getCandidate(uint8 id) external view returns (Candidate memory) {
         Candidate memory c = candidates[id];
         if (c.owner == address(0)) revert InvalidCandidate();
         return c;
@@ -146,11 +116,7 @@ contract MissCosmoVoting {
                            VOTING LOGIC
     //////////////////////////////////////////////////////////////*/
 
-    function vote(
-        uint8 candidateId,
-        uint8 packageId
-    ) external payable {
-
+    function vote(uint8 candidateId, uint8 packageId) external payable {
         Candidate storage c = candidates[candidateId];
 
         if (c.owner == address(0)) revert InvalidCandidate();
@@ -168,13 +134,7 @@ contract MissCosmoVoting {
         c.totalVotes += pkg.votes;
         candidateVotes[candidateId] += pkg.votes;
 
-        emit VotePurchased(
-            msg.sender,
-            candidateId,
-            packageId,
-            pkg.votes,
-            msg.value
-        );
+        emit VotePurchased(msg.sender, candidateId, packageId, pkg.votes, msg.value);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -201,11 +161,7 @@ contract MissCosmoVoting {
         return uint256(answer) * 1e10;
     }
 
-    function getRequiredEth(uint256 usdAmount)
-        public
-        view
-        returns (uint256)
-    {
+    function getRequiredEth(uint256 usdAmount) public view returns (uint256) {
         uint256 ethPrice = getEthPrice();
         return (usdAmount * 1e18) / ethPrice;
     }

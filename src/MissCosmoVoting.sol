@@ -98,13 +98,6 @@ contract MissCosmoVoting {
         }
     }
 
-    function updateCandidateMetadata(uint8 id, string memory newCID) external onlyOwner {
-        if (candidates[id].owner == address(0)) {
-            revert InvalidCandidate();
-        }
-
-        candidates[id].metadataCID = newCID;
-    }
 
     function getCandidate(uint8 id) external view returns (Candidate memory) {
         Candidate memory c = candidates[id];
